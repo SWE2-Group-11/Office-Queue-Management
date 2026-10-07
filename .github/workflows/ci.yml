@@ -62,6 +62,5 @@ jobs:
       - name: Type-check Frontend TypeScript
         run: npx tsc --noEmit
 
-      # Uncomment the following lines if you have tests configured in the frontend
-      # - name: Run Frontend Tests
-      #   run: npx vitest run
+      - name: Run Frontend Tests
+      - run: npx vitest run
