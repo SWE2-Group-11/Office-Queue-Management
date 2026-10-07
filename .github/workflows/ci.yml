@@ -34,7 +34,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run Backend Tests (Vitest)
-        run: npx vitest run --single-fork
+        run: npx vitest run --poolOptions.forks.singleFork
 
   # --- FRONTEND JOB (React + Vite + TS) ---
   frontend-ci:
@@ -64,4 +64,4 @@ jobs:
 
       # Uncomment the following lines if you have tests configured in the frontend
       # - name: Run Frontend Tests
-      #   run: npx vitest run --single-fork
+      #   run: npx vitest run --poolOptions.forks.singleFork
