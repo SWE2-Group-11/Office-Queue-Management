@@ -1,0 +1,67 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # --- BACKEND JOB (Express + TS) ---
+  backend-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend # Set default execution context to backend directory
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: ./backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        run: npm ci
+
+      - name: Run Backend Linter (Oxlint)
+        run: npx oxlint
+
+      - name: Type-check Backend TypeScript
+        run: npx tsc --noEmit
+
+      - name: Run Backend Tests (Vitest)
+        run: npx vitest run
+
+  # --- FRONTEND JOB (React + Vite + TS) ---
+  frontend-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend # Set default execution context to frontend directory
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run Frontend Linter (Oxlint)
+        run: npx oxlint
+
+      - name: Type-check Frontend TypeScript
+        run: npx tsc -b --noEmit
+
+      # Uncomment the following lines if you have tests configured in the frontend
+      # - name: Run Frontend Tests
+      #   run: npx vitest run
