@@ -42,13 +42,63 @@ The server listens on `http://localhost:3000`.
 | `npm test` | Run tests once |
 | `npm run test:watch` | Run tests in watch mode |
 
-## Base Project Structure
+### Server Architecture
 
+```mermaid
+flowchart TD
+    Client([Client React App])
+
+    subgraph Server [Backend Server]
+        Router[Express Router]
+        Controller[Controller]
+        DAO[DAO]
+        Database[(SQLite)]
+
+        subgraph Models [Models]
+            DTO[DTO]
+            Entity[Entity]
+        end
+    end
+
+    Client == "HTTP JSON" ==> Router
+    Router --> Controller
+    Controller --> DAO
+    DAO == "sqlite3" ==> Database
+    Controller -.-> Entity
+    DAO -.-> Entity
+    Controller -.-> DTO
+    Router -.-> DTO
 ```
-src/
-  app.ts        Express app, CORS, routes and database setup
-  index.ts      HTTP server and Socket.IO entry point
-  app.test.ts   Route tests
+
+## API
+
+### `GET /services`
+Returns the list of available services.
+
+**200 OK**
+```json
+[
+  { "id": 0, "tag_name": "Shipping" },
+  { "id": 1, "tag_name": "Accounts" }
+]
+```
+
+### `POST /tickets`
+Creates a new ticket for a service.
+
+**Request**
+```json
+{ "service_id": 1 }
+```
+
+**200 OK**
+```json
+{ "id": 1 }
+```
+
+**404 Not Found** – the service does not exist
+```json
+{ "code": 404, "name": "NotFoundError", "message": "Service not found" }
 ```
 
 # Frontend

@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { app, db } from "./app";
+import { app } from "./app";
+import { db } from "./database/database";
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
