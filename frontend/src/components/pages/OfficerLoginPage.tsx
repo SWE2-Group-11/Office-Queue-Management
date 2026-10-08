@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Counters defined in the backend seed (backend has no endpoint to list them yet)
+const COUNTERS = [1, 2, 3];
 
 export default function OfficerLoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [counter, setCounter] = useState<number>(COUNTERS[0]);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: FormEvent) => {
     e.preventDefault();
-    // In a real implementation, you would validate credentials via your backend API.
-    // For now, we set the auth flag and redirect to the workstation:
+    // TODO: validate credentials against the backend once an officer role exists
     localStorage.setItem('isOfficerAuthenticated', 'true');
-    navigate('/counter');
+    navigate(`/counter/${counter}`);
   };
 
   return (
@@ -24,12 +28,12 @@ export default function OfficerLoginPage() {
           <label className="block text-xs font-extrabold text-gray-700 uppercase mb-1">
             Badge ID / Username
           </label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="w-full p-3 border-2 border-gray-200 rounded-lg font-bold text-gray-900 focus:border-blue-600 outline-none"
-            placeholder="e.g. counter_2_officer"
+            placeholder="e.g. officer_1"
             required
           />
         </div>
@@ -38,8 +42,8 @@ export default function OfficerLoginPage() {
           <label className="block text-xs font-extrabold text-gray-700 uppercase mb-1">
             Password
           </label>
-          <input 
-            type="password" 
+          <input
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-3 border-2 border-gray-200 rounded-lg font-bold text-gray-900 focus:border-blue-600 outline-none"
@@ -48,7 +52,24 @@ export default function OfficerLoginPage() {
           />
         </div>
 
-        <button 
+        <div>
+          <label className="block text-xs font-extrabold text-gray-700 uppercase mb-1">
+            Counter
+          </label>
+          <select
+            value={counter}
+            onChange={(e) => setCounter(Number(e.target.value))}
+            className="w-full p-3 border-2 border-gray-200 rounded-lg font-bold text-gray-900 focus:border-blue-600 outline-none bg-white"
+          >
+            {COUNTERS.map((n) => (
+              <option key={n} value={n}>
+                Counter {n}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-lg py-4 rounded-lg transition-colors mt-2 cursor-pointer shadow-md"
         >

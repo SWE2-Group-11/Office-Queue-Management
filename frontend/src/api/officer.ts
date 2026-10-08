@@ -2,23 +2,16 @@ import { ApiError } from './client';
 
 const BASE_URL = '/api/v1';
 
-export interface CounterServiceSummary {
-  name: string;
-  next: string;
-  avgWait: string;
-  count: number;
-  icon: string;
-}
-
-export interface CounterQueueResponse {
-  totalWaiting: number;
-  services: CounterServiceSummary[];
-}
-
+// Backend: PATCH /counters/:counterId/next-customer
+// 200 -> { code }, 204 -> nobody is waiting
 export interface CalledTicket {
   code: string;
-  service_name: string;
-  counter_number: number;
+}
+
+interface ErrorBody {
+  code: number;
+  name: string;
+  message: string;
 }
 
 // Helper function for officer requests
@@ -33,7 +26,7 @@ async function officerRequest<T>(path: string, options: RequestInit = {}): Promi
   });
 
   if (!response.ok) {
-    let body: any = {};
+    let body: Partial<ErrorBody> = {};
     try {
       body = await response.json();
     } catch {
@@ -53,14 +46,9 @@ async function officerRequest<T>(path: string, options: RequestInit = {}): Promi
   return response.json() as Promise<T>;
 }
 
-
-export function callNextTicket(counterId: number): Promise<CalledTicket> {
-  return officerRequest<CalledTicket>(`/counters/${counterId}/next`, {
-    method: 'POST',
+// Returns undefined when there are no customers waiting (HTTP 204)
+export function callNextTicket(counterId: number): Promise<CalledTicket | undefined> {
+  return officerRequest<CalledTicket | undefined>(`/counters/${counterId}/next-customer`, {
+    method: 'PATCH',
   });
-}
-
-
-export function getCounterQueue(counterId: number): Promise<CounterQueueResponse> {
-  return officerRequest<CounterQueueResponse>(`/counters/${counterId}/queue`);
 }

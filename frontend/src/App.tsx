@@ -1,34 +1,26 @@
-import { useState } from 'react';
 import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ServiceSelectionPage from './components/pages/ServiceSelectionPage';
 import OfficerWorkstation from './components/officer/OfficerWorkstation';
-import OfficerLoginPage from './components/pages/OfficerLoginPage';
-import ProtectedRoute from './components/common/ProtectedRoute';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
+// import OfficerLoginPage from './components/pages/OfficerLoginPage';
+// import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="max-w-7xl mx-auto px-4 py-8 font-sans text-gray-900">
-      
+      <Routes>
+        <Route path="/" element={<ServiceSelectionPage />} />
 
-        <Routes>
-       
-          <Route path="/" element={<ServiceSelectionPage />} />
+        {/* TEMPORARY: officer login disabled, no backend support yet
+        <Route path="/login" element={<OfficerLoginPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/counter/:counterId" element={<OfficerWorkstation />} />
+        </Route>
+        */}
 
-         
-         
-          <Route path="/login" element={<OfficerLoginPage />} />
-
-         
-          <Route element={<ProtectedRoute />}>  </Route>
-            <Route path="/counter" element={<OfficerWorkstation />} />
-             
-             
-        
-        </Routes>
-      </div>
+        {/* TEMPORARY: open the counter directly, e.g. /counter/1 */}
+        <Route path="/counter/:counterId" element={<OfficerWorkstation />} />
+      </Routes>
     </BrowserRouter>
   );
 }
