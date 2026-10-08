@@ -21,35 +21,41 @@ export const db = openDatabase();
 
 // Initialize the simplified database schema (Day table removed)
 db.exec(`
-  -- Service Table
-  CREATE TABLE IF NOT EXISTS Service (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tag_name TEXT NOT NULL UNIQUE,
-      service_time REAL NOT NULL
-  );
+PRAGMA foreign_keys = ON;
 
-  -- Counter Table
-  CREATE TABLE IF NOT EXISTS Counter (
-      id INTEGER PRIMARY KEY AUTOINCREMENT
-  );
+DROP TABLE IF EXISTS ticket;
+DROP TABLE IF EXISTS offers;
+DROP TABLE IF EXISTS counter;
+DROP TABLE IF EXISTS service;
 
-  -- Offers Table (from witch we can know the services offered by a counter in a specific day)
-  CREATE TABLE IF NOT EXISTS Offers (
-      service_id INTEGER,
-      counter_id INTEGER,
-      day_date TEXT, -- Stored directly as YYYY-MM-DD
-      PRIMARY KEY (service_id, counter_id, day_date),
-      FOREIGN KEY (service_id) REFERENCES Service(id) ON DELETE CASCADE,
-      FOREIGN KEY (counter_id) REFERENCES Counter(id) ON DELETE CASCADE
-  );
+-- Service
+CREATE TABLE service (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    tag_name     TEXT    NOT NULL UNIQUE,
+    service_time INTEGER NOT NULL CHECK (service_time > 0)
+);
 
-  -- Ticket Table
-  CREATE TABLE IF NOT EXISTS Ticket (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      day_date TEXT NOT NULL, -- Stored directly as YYYY-MM-DD
-      service_id INTEGER NOT NULL,
-      counter_id INTEGER, -- Nullable initially, set when called by an officer
-      FOREIGN KEY (service_id) REFERENCES Service(id) ON DELETE RESTRICT,
-      FOREIGN KEY (counter_id) REFERENCES Counter(id) ON DELETE SET NULL
-  );
+-- Counters
+CREATE TABLE counter (
+    id INTEGER PRIMARY KEY
+);
+
+-- Which services each counter can handle
+CREATE TABLE offers (
+    service_id INTEGER NOT NULL REFERENCES service(id),
+    counter_id INTEGER NOT NULL REFERENCES counter(id),
+    PRIMARY KEY (service_id, counter_id)
+);
+
+-- Tickets
+CREATE TABLE ticket (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    date       TEXT    NOT NULL CHECK (date IS strftime('%Y-%m-%d', date)),
+    service_id INTEGER NOT NULL REFERENCES service(id),
+    counter_id INTEGER          REFERENCES counter(id),
+
+    -- The serving counter must offer the ticket's service
+    FOREIGN KEY (service_id, counter_id)
+        REFERENCES offers(service_id, counter_id)
+);
 `);
