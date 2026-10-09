@@ -24,19 +24,19 @@ export class TicketsController {
      */
     public createTicket = async (service_id: number): Promise<TicketDTO> => {
         try {
-            // 1. Validation check (Throws 400)
+            // Validation check (Throws 400)
             if (service_id === undefined || service_id === null) {
                 throw new BadRequestError("The field 'service_id' is required.");
             }
 
-            // 2. Existence check (Throws 404)
+            // Existence check (Throws 404)
             const service = this.serviceDAO.findServiceById(Number(service_id));
             if (!service) {
                 throw new NotFoundError("Service not found");
             }
 
-            // 3. Logic execution (Create Ticket)
-            const currentDate = new Date().toISOString().split('T')[0];
+            // Logic execution (Create Ticket)
+            const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
             const newTicket: Ticket = {
                 day_date: currentDate,
@@ -51,8 +51,6 @@ export class TicketsController {
             return new TicketDTO(insertedId);
 
         } catch (error) {
-            // Optional: here you could log the error (e.g., logger.error(error))
-            // Rethrow the error so that the router/caller can catch it
             throw error;
         }
     };
