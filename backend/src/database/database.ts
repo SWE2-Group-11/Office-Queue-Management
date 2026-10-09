@@ -1,14 +1,18 @@
+import fs from "node:fs";
+import path from "node:path";
 import Database from "better-sqlite3";
 import { DB_FILE_PATH } from "../config/config.js";
+
+const SQL_DIR = path.resolve(process.cwd(), "src/database/sql");
 
 function openDatabase(): Database.Database {
   try {
     const connection = new Database(DB_FILE_PATH);
     connection.pragma("journal_mode = WAL");
-    
+
     // Explicitly enable foreign key support for this connection
     connection.pragma("foreign_keys = ON");
-    
+
     console.log("Database connected successfully");
     return connection;
   } catch (err) {
@@ -19,43 +23,24 @@ function openDatabase(): Database.Database {
 
 export const db = openDatabase();
 
-// Initialize the simplified database schema (Day table removed)
-db.exec(`
-PRAGMA foreign_keys = ON;
+/**
+ * Reads a SQL script from the database/sql folder.
+ */
+export const readSql = (file: string): string =>
+    fs.readFileSync(path.join(SQL_DIR, file), "utf-8");
 
-DROP TABLE IF EXISTS ticket;
-DROP TABLE IF EXISTS offers;
-DROP TABLE IF EXISTS counter;
-DROP TABLE IF EXISTS service;
+/**
+ * Drops, recreates and seeds the whole database in a single transaction.
+ * If any step fails, the database is left unchanged.
+ */
+export const resetDatabase = (): void => {
+    const drop = readSql("drop-core.sql");
+    const init = readSql("init-core.sql");
+    const seed = readSql("seed-core.sql");
 
--- Service
-CREATE TABLE service (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    tag_name     TEXT    NOT NULL UNIQUE,
-    service_time INTEGER NOT NULL CHECK (service_time > 0)
-);
-
--- Counters
-CREATE TABLE counter (
-    id INTEGER PRIMARY KEY
-);
-
--- Which services each counter can handle
-CREATE TABLE offers (
-    service_id INTEGER NOT NULL REFERENCES service(id),
-    counter_id INTEGER NOT NULL REFERENCES counter(id),
-    PRIMARY KEY (service_id, counter_id)
-);
-
--- Tickets
-CREATE TABLE ticket (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    date       TEXT    NOT NULL CHECK (date IS strftime('%Y-%m-%d', date)),
-    service_id INTEGER NOT NULL REFERENCES service(id),
-    counter_id INTEGER          REFERENCES counter(id),
-
-    -- The serving counter must offer the ticket's service
-    FOREIGN KEY (service_id, counter_id)
-        REFERENCES offers(service_id, counter_id)
-);
-`);
+    db.transaction(() => {
+        db.exec(drop);
+        db.exec(init);
+        db.exec(seed);
+    })();
+};

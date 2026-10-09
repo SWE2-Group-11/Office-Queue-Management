@@ -2,12 +2,6 @@
 
 PRAGMA foreign_keys = ON;
 
-DELETE FROM ticket;
-DELETE FROM offers;
-DELETE FROM counter;
-DELETE FROM service;
-DELETE FROM sqlite_sequence WHERE name IN ('ticket', 'service');
-
 -- Service types (service_time in minutes)
 INSERT INTO service (id, tag_name, service_time) VALUES
     (1, 'deposit',            5),
