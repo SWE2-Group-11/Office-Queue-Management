@@ -6,5 +6,6 @@ export default defineConfig({
     fileParallelism: false,
     maxWorkers: 1,
     env: { DB_PATH: ':memory:' },
+    setupFiles: ['./src/tests/setup.ts'],
   },
 })

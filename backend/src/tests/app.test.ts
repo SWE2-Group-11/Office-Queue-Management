@@ -18,10 +18,6 @@ beforeEach(() => {
 });
 
 describe("GET /services", () => {
-    it("uses the in-memory database", () => {
-        expect(db.name).toBe(":memory:");
-    });
-
     it("returns an empty list when there are no services", async () => {
         const res = await request(app).get(ROUTES.V1_SERVICES);
 
