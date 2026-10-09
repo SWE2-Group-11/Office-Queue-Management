@@ -6,17 +6,6 @@ import { TicketDTO } from '../models/dto/ticket-dto';
 import { NotFoundError } from '../models/errors/notfound-error';
 import { BadRequestError } from '../models/errors/badrequest-error';
 
-export function getNextCustomer(req: Request, res: Response){
-    const counterId = Number(req.params.counterId);
-    if(Number.isNaN(counterId)) {
-        return res.status(400).json({ error: 'Invalid counterId parameter' });
-    }
-    // TODO: Implement logic to get the next customer for the given counterId
-    // example: const nextCustomer = getNextCustomerForCounter(counterId);
-
-    return res.status(501).json({ message: 'Not implemented yet' , counterId}); // to delete when the function is implemented
-}
-
 export class TicketsController {
     private ticketDAO: TicketDAO;
     private serviceDAO: ServiceDAO;
@@ -65,4 +54,17 @@ export class TicketsController {
             throw error;
         }
     };
+    
+    /**
+     * Retrieves the next customer for the given counter ID.
+     * @param counterId 
+     * @returns A Promise resolving to a TicketDTO or null if no customer is found.
+     */
+    public getNextCustomer = async (counterId: number): Promise<TicketDTO | null> => {
+        if(!Number.isSafeInteger(counterId) || counterId <= 0) {
+            throw new BadRequestError("Invalid counter ID");
+        }
+        // TODO : Implement logic to retrieve the next customer for the given counterId
+        return null; // Placeholder return
+    };  
 }
