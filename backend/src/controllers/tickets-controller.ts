@@ -37,22 +37,29 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         if (!counterExists(counterId)) {
             throw new NotFoundError("Counter not found");
         }
-        const today = toLocalDate();
+        return this.ticketDAO.inTransaction(() => {
+            // Check if the counter exists
+            if (!this.ticketDAO.counterExists(counterId)) {
+                throw new NotFoundError("Counter not found");
+            }
+            const now = new Date();
+            const day = [now.getFullYear(),
+                         (now.getMonth() + 1).toString().padStart(2, '0'),
+                         now.getDate().toString().padStart(2, '0')].join('-');
 
-        const queues = getWaitingQueues(counterId, today);
-        queues.sort((a, b) => b.queueLength - a.queueLength || a.serviceTime - b.serviceTime || a.serviceId - b.serviceId);
+            const queues = this.serviceDAO.getWaitingQueues(counterId, day);
+            queues.sort((a, b) => a.queueLength - b.queueLength || a.serviceTime - b.serviceTime || a.service.id - b.service.id);
 
-        const selectedService = queues.length > 0 ? queues[0].serviceId : null;
-        if(!selectedService) return null; 
+            const selectedService = queues.length > 0 ? queues[0].service : null;
+            if(!selectedService) return null; 
 
-        const ticket = findFirstWaitingTicket(selectedService, today);
-        if(!ticket) {
-            throw new NotFoundError("Selected queue has no waiting tickets");
-        }
+            const ticket = this.ticketDAO.findFirstWaitingTicket(selectedService.id, day);
+            if(!ticket) {
+                throw new NotFoundError("Selected queue has no waiting tickets");
+            }
 
-        assignTicketToCounter(ticket.id, counterId, today);
-        const ticketNumber = getTicketNumber(ticket);
-        const displayNumber = ticketNumber % (MAX_TICKET_NUMBER_PER_SERVICE + 1);
-        return ticketEntityToNextCustomerResponseDTO(ticket, displayNumber);
+            this.ticketDAO.assignTicketToCounter(ticket.id, counterId, day);
+            return new TicketDTO(ticket.id);
     });  
+    }
 }
