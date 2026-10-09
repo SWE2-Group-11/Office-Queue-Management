@@ -1,19 +1,19 @@
-import { Response } from 'express';
-import { AppError } from '../models/errors/app-error';
-import { NotFoundError } from '../models/errors/notfound-error';
-import { ErrorDTO } from '../models/dto/error-dto';
-import { BadRequestError } from '../models/errors/badrequest-error';
+import { Response } from "express";
+import { AppError } from "../models/errors/app-error";
+import { NotFoundError } from "../models/errors/notfound-error";
+import { BadRequestError } from "../models/errors/badrequest-error";
+import { appErrorToDTO } from "./mapper-service";
 
 /**
- * Core helper that formats any AppError into the official ErrorDTO and sends the HTTP response.
+ * Sends any thrown value as an ErrorDTO response.
+ * Unexpected errors are logged and returned as a generic 500.
  */
-export const sendAppError = (error: AppError, res: Response): Response => {
-    const errorDTO: ErrorDTO = {
-        code: error.statusCode,
-        name: error.name,
-        message: error.message
-    };
-    return res.status(error.statusCode).json(errorDTO);
+export const sendAppError = (error: unknown, res: Response): Response => {
+    if (!(error instanceof AppError)) {
+        console.error(error);
+    }
+    const errorDTO = appErrorToDTO(error);
+    return res.status(errorDTO.code).json(errorDTO);
 };
 
 /**
@@ -24,7 +24,9 @@ export const sendNotFoundError = (message: string, res: Response): Response => {
     return sendAppError(notFoundError, res);
 };
 
-
+/**
+ * Formats and sends an HTTP 400 Bad Request error.
+ */
 export const sendBadRequestError = (message: string, res: Response): Response => {
     const badRequestError = new BadRequestError(message);
     return sendAppError(badRequestError, res);

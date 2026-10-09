@@ -5,7 +5,7 @@ flowchart TD
     Client([Frontend])
 
     subgraph Server [Backend]
-        Router[Router]
+        Route[Route]
         Controller[Controller]
         DAO[DAO]
         Database[(SQLite)]
@@ -16,14 +16,14 @@ flowchart TD
         end
     end
 
-    Client == "HTTP JSON" ==> Router
-    Router --> Controller
+    Client == "HTTP JSON" ==> Route
+    Route --> Controller
     Controller --> DAO
     DAO == "sql" ==> Database
     Controller -.-> Entity
     DAO -.-> Entity
     Controller -.-> DTO
-    Router -.-> DTO
+    Route -.-> DTO
 ```
 
 ## Backend layers (`backend/src/`)
@@ -43,6 +43,6 @@ flowchart TD
 
 ## Rules
 
-- Dependencies go one way: Router → Controller → DAO. 
+- Dependencies go one way: Route → Controller → DAO. 
 - A DAO knows nothing about HTTP; a route never runs SQL.
 - The API returns DTOs, never DB entities.

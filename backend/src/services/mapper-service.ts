@@ -1,12 +1,13 @@
 // src/services/mapper-service.ts
 import { ErrorDTO } from '../models/dto/error-dto';
 import { ServiceDTO } from '../models/dto/service-dto';
+import { CreateTicketResponseDTO } from "../models/dto/ticket-dto";
 import { Service } from '../models/entities/service';
 import { AppError } from '../models/errors/app-error';
+import { Ticket } from "../models/entities/ticket";
 
 /**
  * Maps an operational AppError or a generic internal error into an ErrorDTO instance.
- * Identical to appErrorToDTO from the provided reference.
  */
 export const appErrorToDTO = (error: any): ErrorDTO => {
     let errorDTO: ErrorDTO;
@@ -22,7 +23,7 @@ export const appErrorToDTO = (error: any): ErrorDTO => {
         errorDTO = new ErrorDTO(
             500,
             "InternalServerError",
-            error.message || "An unexpected error occurred"
+            "An unexpected error occurred"
         );
     }
 
@@ -32,7 +33,13 @@ export const appErrorToDTO = (error: any): ErrorDTO => {
 /**
  * Maps a core Service database entity into a client-ready ServiceDTO instance.
  */
-export const serviceEntityToResponseDTO = (service: Service | null): ServiceDTO | null => {
-    if (!service) return null;
+export const serviceEntityToDTO = (service: Service): ServiceDTO => {
     return new ServiceDTO(service.id, service.tag_name);
+};
+
+/**
+ * Maps a core Ticket database entity into a client-ready CreateTicketResponseDTO instance.
+ */
+export const ticketEntityToCreateResponseDTO = (ticket: Ticket): CreateTicketResponseDTO => {
+    return new CreateTicketResponseDTO(ticket.id);
 };
