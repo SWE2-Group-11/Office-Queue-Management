@@ -1,26 +1,5 @@
-import Database from "better-sqlite3";
-import { DB_FILE_PATH } from "../config/config.js";
+-- Office Queue Management (SQLite)
 
-function openDatabase(): Database.Database {
-  try {
-    const connection = new Database(DB_FILE_PATH);
-    connection.pragma("journal_mode = WAL");
-    
-    // Explicitly enable foreign key support for this connection
-    connection.pragma("foreign_keys = ON");
-    
-    console.log("Database connected successfully");
-    return connection;
-  } catch (err) {
-    console.error("Error opening the database: ", (err as Error).message);
-    throw err;
-  }
-}
-
-export const db = openDatabase();
-
-// Initialize the simplified database schema (Day table removed)
-db.exec(`
 PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS ticket;
@@ -58,4 +37,3 @@ CREATE TABLE ticket (
     FOREIGN KEY (service_id, counter_id)
         REFERENCES offers(service_id, counter_id)
 );
-`);
