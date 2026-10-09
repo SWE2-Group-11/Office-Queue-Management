@@ -1,10 +1,13 @@
 ## What changes
-<!-- 1-2 lines -->
+<!-- 1 line. e.g. "Add ticket creation logic and unit tests" -->
 
 ## Related task
-<!-- YouTrack task, e.g. OQM-12, and "Closes #12" if there is a GitHub issue -->
+<!-- YouTrack task ID. e.g. "OQM-10" -->
 
-## Checklist
-- [ ] PR title follows Conventional Commits
-- [ ] CI passes
-- [ ] Docs updated if needed
+## Definition of Done
+<!-- Tick what is done, write N/A if not applicable. e.g. "- [ ] Unit tested — N/A (docs only)" -->
+- [ ] Unit tested
+- [ ] Integration tested
+- [ ] E2E tested
+- [ ] Code reviewed <!-- ticked by the reviewer -->
+- [x] Code pushed on GitHub
