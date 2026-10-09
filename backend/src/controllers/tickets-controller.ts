@@ -64,7 +64,29 @@ export class TicketsController {
         if(!Number.isSafeInteger(counterId) || counterId <= 0) {
             throw new BadRequestError("Invalid counter ID");
         }
-        // TODO : Implement logic to retrieve the next customer for the given counterId
-        return null; // Placeholder return
-    };  
+        return this.ticketDAO.inTransaction(() => {
+            // Check if the counter exists
+            if (!this.ticketDAO.counterExists(counterId)) {
+                throw new NotFoundError("Counter not found");
+            }
+            const now = new Date();
+            const day = [now.getFullYear(),
+                         (now.getMonth() + 1).toString().padStart(2, '0'),
+                         now.getDate().toString().padStart(2, '0')].join('-');
+
+            const queues = this.serviceDAO.getWaitingQueues(counterId, day);
+            queues.sort((a, b) => a.queueLength - b.queueLength || a.serviceTime - b.serviceTime || a.service.id - b.service.id);
+
+            const selectedService = queues.length > 0 ? queues[0].service : null;
+            if(!selectedService) return null; 
+
+            const ticket = this.ticketDAO.findFirstWaitingTicket(selectedService.id, day);
+            if(!ticket) {
+                throw new NotFoundError("Selected queue has no waiting tickets");
+            }
+
+            this.ticketDAO.assignTicketToCounter(ticket.id, counterId, day);
+            return new TicketDTO(ticket.id);
+    });  
+    }
 }

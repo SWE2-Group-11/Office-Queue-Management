@@ -1,6 +1,12 @@
 import { Database } from 'better-sqlite3';
 import { Service } from '../models/entities/service';
 
+type ServiceQueue = {
+    service: Service;
+    serviceTime: number;
+    queueLength: number;
+};
+
 export class ServiceDAO {
     private db: Database;
 
@@ -27,5 +33,26 @@ export class ServiceDAO {
         const sql = `SELECT id, tag_name, service_time FROM Service WHERE id = ?`;
         const row = this.db.prepare(sql).get(serviceId) as Service | undefined;
         return row ? { id: row.id, tag_name: row.tag_name, service_time: row.service_time } : null;
+    }
+
+    /**
+     * Retrieves the waiting queues for a specific counter on a given day.
+     * @param counterId The numerical ID of the counter.
+     * @param day The date in 'YYYY-MM-DD' format.
+     * @returns An array of ServiceQueue objects, each containing service details and queue length.
+     */
+    getWaitingQueues(counterId: number, day: string): ServiceQueue[] {
+        const sql = `
+            SELECT 
+                s.id AS serviceId, 
+                s.service_time AS serviceTime,
+                COUNT(t.id) AS queueLength
+            FROM offers o
+            JOIN service s ON o.service_id = s.id
+            JOIN Ticket t ON s.id = t.service_id
+            WHERE o.counter_id = ? AND t.day_date = ? AND t.counter_id IS NULL
+            GROUP BY s.id, s.service_time
+        `;
+        return this.db.prepare(sql).all(counterId, day) as ServiceQueue[];
     }
 }
