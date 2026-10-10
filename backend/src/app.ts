@@ -4,6 +4,7 @@ import cors from "cors";
 import { ROUTES, CLIENT_ORIGIN } from "./config/config";
 import servicesRoute from "./routes/services-route";
 import ticketsRoute from "./routes/tickets-route";
+import countersRoute from "./routes/counters-route";
 import { sendAppError, sendNotFoundError, sendBadRequestError } from "./services/error-service";
 
 // Init express
@@ -20,6 +21,7 @@ app.use(express.json());
 // Routes
 app.use(ROUTES.V1_SERVICES, servicesRoute);
 app.use(ROUTES.V1_TICKETS, ticketsRoute);
+app.use(ROUTES.V1_COUNTERS, countersRoute);
 
 // Unknown routes → 404 in ErrorDTO format
 app.use((req: Request, res: Response) => {
