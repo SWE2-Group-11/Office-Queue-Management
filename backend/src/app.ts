@@ -7,6 +7,7 @@ import { authenticateSession, requireRole } from "./services/auth-service";
 import authRouter from "./routes/auth-route";
 import servicesRoute from "./routes/services-route";
 import ticketsRoute from "./routes/tickets-route";
+import countersRoute from "./routes/counters-route";
 import { sendAppError, sendNotFoundError, sendBadRequestError } from "./services/error-service";
 
 // Init express
@@ -31,9 +32,9 @@ app.use(session({
 app.use(authenticateSession);
 
 // Routes
-app.use(ROUTES.V1_AUTH, authRouter);
-app.use(ROUTES.V1_SERVICES, requireRole("device", "manager"), servicesRoute);
-app.use(ROUTES.V1_TICKETS, requireRole("device"), ticketsRoute);
+app.use(ROUTES.V1_SERVICES, servicesRoute);
+app.use(ROUTES.V1_TICKETS, ticketsRoute);
+app.use(ROUTES.V1_COUNTERS, countersRoute);
 
 // Unknown routes → 404 in ErrorDTO format
 app.use((req: Request, res: Response) => {

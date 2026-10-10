@@ -11,12 +11,14 @@ const APP_V1_BASE_URL = "/api/v1";
 const URL_AUTH = "/session";
 const URL_TICKETS = "/tickets";
 const URL_SERVICES = "/services";
+const URL_COUNTERS = "/counters";
 
 export const ROUTES = {
     V1_AUTH: `${APP_V1_BASE_URL}${URL_AUTH}`,
     V1_TICKETS: `${APP_V1_BASE_URL}${URL_TICKETS}`,
     V1_SERVICES: `${APP_V1_BASE_URL}${URL_SERVICES}`,
-} as const;
+    V1_COUNTERS: `${APP_V1_BASE_URL}${URL_COUNTERS}`,
+};
 
 // Server configuration
 export const APP_PORT = Number(process.env.PORT) || 3000;
