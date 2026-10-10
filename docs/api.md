@@ -29,7 +29,7 @@ Creates a ticket for a service in today's queue.
 { "service_id": 1 }
 ```
 
-**200 OK**: `id` is the ticket number given to the customer.
+**200 OK**: `code` is the ticket number given to the customer.
 
 ```json
 { "code": "S1 - 3" }

@@ -2,6 +2,8 @@ import { Response } from "express";
 import { AppError } from "../models/errors/app-error";
 import { NotFoundError } from "../models/errors/notfound-error";
 import { BadRequestError } from "../models/errors/badrequest-error";
+import { UnauthorizedError } from "../models/errors/unauthorized-error";
+import { ForbiddenError } from "../models/errors/forbidden-error";
 import { appErrorToDTO } from "./mapper-service";
 
 /**
@@ -31,3 +33,15 @@ export const sendBadRequestError = (message: string, res: Response): Response =>
     const badRequestError = new BadRequestError(message);
     return sendAppError(badRequestError, res);
 };
+
+/**
+ * Formats and sends an HTTP 401 Unauthorized error.
+ */
+export const sendUnauthorizedError = (message: string, res: Response): Response =>
+    sendAppError(new UnauthorizedError(message), res);
+
+/**
+ * Formats and sends an HTTP 403 Forbidden error.
+ */
+export const sendForbiddenError = (message: string, res: Response): Response =>
+    sendAppError(new ForbiddenError(message), res);

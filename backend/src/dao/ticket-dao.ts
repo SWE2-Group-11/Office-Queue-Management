@@ -2,23 +2,27 @@ import { db } from "../database/database";
 import { Ticket } from '../models/entities/ticket';
 
 /**
+ * Derives the daily number of a ticket: its position among the tickets
+ * of the same day and service, ordered by ID.
+ */
+export const getTicketNumber = (ticket: Ticket): number => {
+    const sql = "SELECT COUNT(*) AS total FROM ticket WHERE date = ? AND service_id = ? AND id <= ?";
+    const row = db
+        .prepare<[string, number, number], { total: number }>(sql)
+        .get(ticket.date, ticket.service_id, ticket.id)!;
+    return row.total;
+};
+
+/**
  * Persists a new ticket record into the database.
  * @param date The day the ticket belongs to.
  * @param service_id The service the ticket is queued for.
- * @returns The ticket code of the newly ticket.
+ * @returns The newly created ticket and its daily number.
  */
-export const saveTicket = (date: string, service_id: number): number => {
-    const executeTransaction = db.transaction((dateParam: string, serviceIdParam: number) => {
-        const countSql = "SELECT COUNT(*) as total FROM ticket WHERE date = ? AND service_id = ?";
-        const countResult = db.prepare(countSql).get(dateParam, serviceIdParam) as { total: number };
-        
-        const ticketNumber = countResult.total + 1;
-
-        const insertSql = "INSERT INTO ticket (date, service_id, counter_id) VALUES (?, ?, ?)";
-        db.prepare(insertSql).run(dateParam, serviceIdParam, null);
-
-        return ticketNumber;
-    });
-
-    return executeTransaction(date, service_id);
-};
+export const saveTicket = (date: string, service_id: number): { ticket: Ticket; ticketNumber: number } =>
+    db.transaction(() => {
+        const sql = "INSERT INTO ticket (date, service_id) VALUES (?, ?)";
+        const result = db.prepare(sql).run(date, service_id);
+        const ticket = new Ticket(Number(result.lastInsertRowid), date, service_id, null);
+        return { ticket, ticketNumber: getTicketNumber(ticket) };
+    })();

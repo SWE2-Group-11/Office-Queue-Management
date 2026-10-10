@@ -3,6 +3,8 @@ import { findServiceById } from '../dao/service-dao';
 import { CreateTicketRequestDTO, CreateTicketResponseDTO } from '../models/dto/ticket-dto';
 import { NotFoundError } from '../models/errors/notfound-error';
 import { ticketDataToCreateResponseDTO } from '../services/mapper-service';
+import { toLocalDate } from '../services/date-service';
+import { MAX_TICKET_NUMBER_PER_SERVICE } from "../config/config";
 
 /**
  * Creates a new ticket for the given service in today's queue.
@@ -16,8 +18,9 @@ export const createTicket = (request: CreateTicketRequestDTO): CreateTicketRespo
         throw new NotFoundError("Service not found");
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    const ticketNumber = saveTicket(today, service.id);
+    const today = toLocalDate();
+    const { ticket, ticketNumber } = saveTicket(today, service.id);
+    const displayNumber = ticketNumber % (MAX_TICKET_NUMBER_PER_SERVICE + 1);
     
-    return ticketDataToCreateResponseDTO(service.id, ticketNumber);
+    return ticketDataToCreateResponseDTO(ticket, displayNumber);
 };
