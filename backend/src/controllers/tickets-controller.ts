@@ -1,11 +1,9 @@
-import { saveTicket, counterExists, findFirstWaitingTicket, assignTicketToCounter, getTicketNumber } from '../dao/ticket-dao';
+import { saveTicket, counterExists, inTransaction, findFirstWaitingTicket, assignTicketToCounter } from '../dao/ticket-dao';
 import { findServiceById, getWaitingQueues } from '../dao/service-dao';
 import { CreateTicketRequestDTO, CreateTicketResponseDTO, NextCustomerResponseDTO } from '../models/dto/ticket-dto';
 import { NotFoundError } from '../models/errors/notfound-error';
-import { ticketDataToCreateResponseDTO, ticketEntityToNextCustomerResponseDTO } from '../services/mapper-service';
-import { toLocalDate } from '../services/date-service';
-import { MAX_TICKET_NUMBER_PER_SERVICE } from "../config/config";
-import { inTransaction } from '../database/database';
+import { BadRequestError } from '../models/errors/badrequest-error';
+import { ticketEntityToCreateResponseDTO, ticketEntityToNextCustomerResponseDTO } from '../services/mapper-service';
 
 /**
  * Creates a new ticket for the given service in today's queue.
@@ -32,34 +30,34 @@ export const createTicket = (request: CreateTicketRequestDTO): CreateTicketRespo
  * @returns A Promise resolving to a TicketDTO or null if no customer is found.
 */
 export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | null => {
+    if(!Number.isSafeInteger(counterId) || counterId <= 0) {
+        throw new BadRequestError("Invalid counter ID");
+    }
     return inTransaction(() => {
         // Check if the counter exists
         if (!counterExists(counterId)) {
             throw new NotFoundError("Counter not found");
         }
-        return this.ticketDAO.inTransaction(() => {
-            // Check if the counter exists
-            if (!this.ticketDAO.counterExists(counterId)) {
-                throw new NotFoundError("Counter not found");
-            }
-            const now = new Date();
-            const day = [now.getFullYear(),
-                         (now.getMonth() + 1).toString().padStart(2, '0'),
-                         now.getDate().toString().padStart(2, '0')].join('-');
+        const now = new Date();
+        // Format the date as 'YYYY-MM-DD'
+        const day = [now.getFullYear(),
+                        (now.getMonth() + 1).toString().padStart(2, '0'),
+                        now.getDate().toString().padStart(2, '0')].join('-');
 
-            const queues = this.serviceDAO.getWaitingQueues(counterId, day);
-            queues.sort((a, b) => a.queueLength - b.queueLength || a.serviceTime - b.serviceTime || a.service.id - b.service.id);
+        const queues = getWaitingQueues(counterId, day);
+        queues.sort((a, b) => b.queueLength - a.queueLength || b.serviceTime - a.serviceTime || b.serviceId - a.serviceId);
 
-            const selectedService = queues.length > 0 ? queues[0].service : null;
-            if(!selectedService) return null; 
+        const selectedService = queues.length > 0 ? queues[0].serviceId : null;
+        if(!selectedService) return null; 
 
-            const ticket = this.ticketDAO.findFirstWaitingTicket(selectedService.id, day);
-            if(!ticket) {
-                throw new NotFoundError("Selected queue has no waiting tickets");
-            }
+        const ticket = findFirstWaitingTicket(selectedService, day);
+        if(!ticket) {
+            throw new NotFoundError("Selected queue has no waiting tickets");
+        }
 
-            this.ticketDAO.assignTicketToCounter(ticket.id, counterId, day);
-            return new TicketDTO(ticket.id);
+        assignTicketToCounter(ticket.id, counterId, day);
+        return ticketEntityToNextCustomerResponseDTO(ticket);
     });  
-    }
 }
+
+   

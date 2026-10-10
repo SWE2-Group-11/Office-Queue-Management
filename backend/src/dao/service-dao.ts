@@ -2,7 +2,7 @@ import { db } from "../database/database";
 import { Service } from '../models/entities/service';
 
 type ServiceQueue = {
-    service: Service;
+    serviceId: number;
     serviceTime: number;
     queueLength: number;
 };
@@ -50,7 +50,7 @@ export class ServiceDAO {
             FROM offers o
             JOIN service s ON o.service_id = s.id
             JOIN Ticket t ON s.id = t.service_id
-            WHERE o.counter_id = ? AND t.day_date = ? AND t.counter_id IS NULL
+            WHERE o.counter_id = ? AND t.date = ? AND t.counter_id IS NULL
             GROUP BY s.id, s.service_time
         `;
         return this.db.prepare(sql).all(counterId, day) as ServiceQueue[];
