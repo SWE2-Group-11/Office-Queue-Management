@@ -27,6 +27,8 @@ docs/       Project documentation
 | `cors` | Allows the frontend origin to call the API |
 | `socket.io` | Real-time events between server and clients |
 | `better-sqlite3` | SQLite database (synchronous driver) |
+| `express-session` | Session cookies |
+| `passport`, `passport-local` | Login with username and password |
 | `typescript` | Type checking and compilation (pinned to v6) |
 | `tsx` | Runs TypeScript directly in development, with auto-restart |
 | `oxlint` | Linting |
@@ -59,16 +61,14 @@ The server listens on `http://localhost:3000`.
 | `npm test` | Run tests once |
 | `npm run test:watch` | Run tests in watch mode |
 
-<!--
-### Demo users
+### Demo accounts
 
-Created by `seed-auth.sql`. All demo users have the password `password`.
+All demo accounts have the password `password`.
 
 | Username | Role |
 |---|---|
-| `officer1`, `officer2`, `officer3` | Officer |
-| `manager1` | Manager |
--->
+| `manager` | Manager |
+| `device` | Device (totem, counters, display) |
 
 ## Frontend
 

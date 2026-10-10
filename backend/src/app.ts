@@ -1,7 +1,10 @@
 import express, { Request, Response, NextFunction } from "express";
+import session from "express-session";
 import morgan from "morgan";
 import cors from "cors";
-import { ROUTES, CLIENT_ORIGIN } from "./config/config";
+import { ROUTES, CLIENT_ORIGIN, SESSION_SECRET } from "./config/config";
+import { authenticateSession, requireRole } from "./services/auth-service";
+import authRouter from "./routes/auth-route";
 import servicesRoute from "./routes/services-route";
 import ticketsRoute from "./routes/tickets-route";
 import { sendAppError, sendNotFoundError, sendBadRequestError } from "./services/error-service";
@@ -11,15 +14,26 @@ export const app = express();
 
 // Middlewares
 app.use(morgan("dev"));
+
 app.use(cors({
     origin: CLIENT_ORIGIN,
     optionsSuccessStatus: 200,
+    credentials: true
 }));
 app.use(express.json());
 
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(authenticateSession);
+
 // Routes
-app.use(ROUTES.V1_SERVICES, servicesRoute);
-app.use(ROUTES.V1_TICKETS, ticketsRoute);
+app.use(ROUTES.V1_AUTH, authRouter);
+app.use(ROUTES.V1_SERVICES, requireRole("device", "manager"), servicesRoute);
+app.use(ROUTES.V1_TICKETS, requireRole("device"), ticketsRoute);
 
 // Unknown routes → 404 in ErrorDTO format
 app.use((req: Request, res: Response) => {
