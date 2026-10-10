@@ -45,6 +45,12 @@ npm install
 npm run dev
 ```
 
+If running for the first time or in need to recreate the database:
+
+```bash
+RESET_DB=true npm run dev
+```
+
 The server listens on `http://localhost:3000`.
 
 ### Scripts
