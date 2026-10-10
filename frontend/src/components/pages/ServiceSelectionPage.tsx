@@ -10,20 +10,20 @@ interface Service {
   name: string;
   description: string;
   estWait: string;
-  theme?: string;
 }
 
 interface TicketData {
   ticketCode: string;
   serviceName: string;
+  estimatedWait: string;
 }
 
 export default function ServiceSelectionPage() {
   const mockServices: Service[] = [
-    { id: 1, category: 'ACCOUNT',  name: 'Account Services', description: 'Deposits, withdrawals and account assistance',  estWait: '~8 min',  theme: 'blue' },
-    { id: 2, category: 'POSTAL', name: 'Send a Package', description: 'Domestic and international shipping',  estWait: '~55 min',   theme: 'teal' },
-    { id: 3, category: 'COLLECTION', name: 'Collect a Package', description: 'Pick up a package or registered item', estWait: '~15 min',   theme: 'emerald' },
-    { id: 4, category: 'POSTAL',  name: 'Postal Services', description: 'Stamps, registered mail and other services',  estWait: '~30 min',  theme: 'blue' }
+    { id: 1, category: 'ACCOUNT',  name: 'Account Services', description: 'Deposits, withdrawals and account assistance',  estWait: '~8 min' },
+    { id: 2, category: 'POSTAL', name: 'Send a Package', description: 'Domestic and international shipping',  estWait: '~55 min' },
+    { id: 3, category: 'COLLECTION', name: 'Collect a Package', description: 'Pick up a package or registered item', estWait: '~15 min' },
+    { id: 4, category: 'POSTAL',  name: 'Postal Services', description: 'Stamps, registered mail and other services',  estWait: '~30 min' }
   ];
 
   const [services, setServices] = useState<Service[]>(mockServices);
@@ -32,7 +32,6 @@ export default function ServiceSelectionPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
- 
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -43,15 +42,14 @@ export default function ServiceSelectionPage() {
           setServices(data);
         }
       } catch (err) {
-       
-        console.log('Using fallback mock services.');
+        // Fallback to mock services silently
       }
     };
 
     fetchServices();
   }, []);
 
-  const handleGetTicket = async (serviceId: number | string) => {
+const handleGetTicket = async (serviceId: number | string) => {
     if (!activeModalService) return;
     setLoading(true);
     setError(null);
@@ -59,20 +57,27 @@ export default function ServiceSelectionPage() {
       const response = await fetch('/api/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId }),
+      
+        body: JSON.stringify({ service_id: serviceId }),
       });
       if (!response.ok) throw new Error('Could not generate ticket');
       const ticket = await response.json();
       
+   
+      const formattedCode = `A00${ticket.id}`;
+
       setTicketData({
-        ticketCode: ticket.ticketCode || 'A003',
+        ticketCode: formattedCode,
         serviceName: activeModalService.name,
+        estimatedWait: activeModalService.estWait,
       });
       setActiveModalService(null);
     } catch (err) {
+    
       setTicketData({
         ticketCode: 'A003',
         serviceName: activeModalService.name,
+        estimatedWait: activeModalService.estWait,
       });
       setActiveModalService(null);
     } finally {
@@ -130,7 +135,7 @@ export default function ServiceSelectionPage() {
                 <ServiceCard 
                   key={service.id} 
                   service={service} 
-                  onSelect={(s: any) => setActiveModalService(s)} 
+                  onSelect={(s) => setActiveModalService(s)} 
                 />
               ))}
             </div>

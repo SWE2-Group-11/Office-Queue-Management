@@ -2,71 +2,68 @@ import React from 'react';
 
 interface Service {
   id: number | string;
-  category: string;
   name: string;
   description: string;
   estWait: string;
 }
 
-interface ServiceConfirmationModalProps {
+interface ModalProps {
   service: Service | null;
   onClose: () => void;
-  onConfirm: (serviceId: number | string) => void;
+  onConfirm: (service_id: number | string) => void;
   loading: boolean;
 }
 
-export default function ServiceConfirmationModal({ 
-  service, 
-  onClose, 
-  onConfirm, 
-  loading 
-}: ServiceConfirmationModalProps) {
+export default function ServiceConfirmationModal({ service, onClose, onConfirm, loading }: ModalProps) {
   if (!service) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+   
+      <div className="bg-white rounded-2xl max-w-lg w-full p-8 border-2 border-slate-300 shadow-2xl text-left">
         
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-       
-        <div className="text-left mb-6">
-          <div className="flex items-center space-x-2 text-sky-600 mb-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            <span className="text-xs font-extrabold tracking-wider">{service.category} SERVICES</span>
-          </div>
-
-          <p className="text-xs text-slate-500">You selected</p>
-          <h2 className="text-2xl font-extrabold text-slate-900 mt-0.5">{service.name}</h2>
-          <p className="text-sm text-slate-600 mt-1">{service.description}</p>
+      
+        <div className="flex items-center space-x-3 mb-4">
+          <span className="w-10 h-10 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center text-lg font-bold border border-slate-300 shrink-0" role="img" aria-label="Confirmation">
+            📌
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+            Action Required
+          </span>
         </div>
 
-        <div className="space-y-3">
+       
+        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          Confirm Your Service Selection
+        </h2>
+        
+        <p className="text-slate-600 text-base mt-2">
+          You are about to get a ticket for the following service:
+        </p>
+
+      
+        <div className="mt-6 p-5 bg-slate-50 rounded-xl border-2 border-slate-200">
+          <h3 className="text-lg font-bold text-slate-900">{service.name}</h3>
+          <p className="text-slate-600 text-sm mt-1">{service.description}</p>
+       
+        </div>
+
+      
+        <div className="mt-8 flex items-center justify-end space-x-4">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="px-5 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition-colors"
+          >
+            Cancel
+          </button>
+          
           <button
             onClick={() => onConfirm(service.id)}
             disabled={loading}
-            className="w-full py-4 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-bold shadow-lg shadow-sky-600/20 transition-all flex items-center justify-center space-x-2"
+            className="px-6 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors disabled:opacity-50"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-            </svg>
-            <span>{loading ? 'Processing...' : 'Get my ticket'}</span>
-          </button>
-
-          <button
-            onClick={onClose}
-            className="w-full py-3 text-slate-700 hover:bg-slate-50 rounded-2xl font-semibold transition-colors text-sm"
-          >
-            Choose another service
+            {loading ? 'Generating...' : 'Confirm & Get Ticket'}
           </button>
         </div>
 
