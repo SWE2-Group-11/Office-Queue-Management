@@ -40,7 +40,7 @@ export const findFirstWaitingTicket = (serviceId: number, day: string): {id: num
     const sql = `
         SELECT id 
         FROM Ticket 
-        WHERE service_id = ? AND day_date = ? AND counter_id IS NULL 
+        WHERE service_id = ? AND date = ? AND counter_id IS NULL 
         ORDER BY id ASC 
         LIMIT 1
     `;
@@ -59,7 +59,7 @@ export const assignTicketToCounter = (ticketId: number, counterId: number, day:s
     const sql = `
         UPDATE Ticket 
         SET counter_id = ? 
-        WHERE id = ? AND day_date = ? AND counter_id IS NULL
+        WHERE id = ? AND date = ? AND counter_id IS NULL
     `;
     const result = db.prepare(sql).run(counterId, ticketId, day);
     if (result.changes !== 1) {

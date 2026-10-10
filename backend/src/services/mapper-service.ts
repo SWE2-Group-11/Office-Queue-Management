@@ -1,7 +1,7 @@
 // src/services/mapper-service.ts
 import { ErrorDTO } from '../models/dto/error-dto';
 import { ServiceDTO } from '../models/dto/service-dto';
-import { CreateTicketResponseDTO } from "../models/dto/ticket-dto";
+import { CreateTicketResponseDTO, NextCustomerResponseDTO } from "../models/dto/ticket-dto";
 import { Service } from '../models/entities/service';
 import { AppError } from '../models/errors/app-error';
 import { Ticket } from "../models/entities/ticket";
@@ -42,4 +42,8 @@ export const serviceEntityToDTO = (service: Service): ServiceDTO => {
  */
 export const ticketEntityToCreateResponseDTO = (ticket: Ticket): CreateTicketResponseDTO => {
     return new CreateTicketResponseDTO(ticket.id);
+};
+
+export const ticketEntityToNextCustomerResponseDTO = (ticket: Pick<Ticket, 'id'>): NextCustomerResponseDTO => {
+    return new NextCustomerResponseDTO(ticket.id);
 };

@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import { createTicket,  } from "../controllers/tickets-controller";
-import { CreateTicketRequestDTO, CreateTicketRequestSchema, CreateTicketResponseDTO } from "../models/dto/ticket-dto";
+import { createTicket, getNextCustomer } from "../controllers/tickets-controller";
+import { CreateTicketRequestDTO, CreateTicketRequestSchema, CreateTicketResponseDTO, NextCustomerResponseDTO } from "../models/dto/ticket-dto";
 import { validateBody } from "../services/middleware-service";
 
 const router = express.Router();
+
 
 router.post(
     "/",
@@ -13,23 +14,18 @@ router.post(
     },
 );
 
-/** 
-router.post('/counters/:counterId/next-customer', async (req, res) => {
-    try {
-        const counterId = Number(req.params.counterId);
-        const ticket = await controller.getNextCustomer(counterId);
-
-        // If no ticket is found, respond with '204 No Content' because it could mean that there are no customers waiting for that counter.
+router.post(
+    "/counters/:counterId/next-customer",
+    (
+        req: Request<{ counterId: string }>,
+        res: Response<NextCustomerResponseDTO>
+    ) => {
+        const ticket = getNextCustomer(Number(req.params.counterId));
         if (ticket === null) {
-            res.status(204).send(); // No Content
+            return res.status(204).send();
         }
-        
-        return res.status(200).json(ticket);
-    } catch (error) {
-        if(error instanceof AppError) {
-            return sendAppError(error, res);
-        }
-        return sendAppError(new AppError(500, "InternalServerError", "An unexpected error occurred."), res);
+        return res.json(ticket);
     }
-});
-*/
+);
+
+export default router;
