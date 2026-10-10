@@ -1,2 +1,23 @@
+import path from "node:path";
+
 // Database
-export const DB_FILE_PATH = process.env.DB_PATH ?? "./src/data/database.sqlite";
+export const DB_FILE_PATH = process.env.DB_PATH ?? path.resolve(process.cwd(), "src/data/database.sqlite");
+
+// Drop, recreate and seed the database at startup (default: false)
+export const RESET_DB = process.env.RESET_DB === "true";
+
+// Application URLs
+const APP_V1_BASE_URL = "/api/v1";
+const URL_TICKETS = "/tickets";
+const URL_SERVICES = "/services";
+
+export const ROUTES = {
+    V1_TICKETS: `${APP_V1_BASE_URL}${URL_TICKETS}`,
+    V1_SERVICES: `${APP_V1_BASE_URL}${URL_SERVICES}`,
+};
+
+// Server configuration
+export const APP_PORT = Number(process.env.PORT) || 3000;
+
+// Frontend allowed by CORS
+export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? "http://localhost:5173";

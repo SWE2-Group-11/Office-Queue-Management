@@ -1,8 +1,25 @@
 # Office-Queue-Management
 
-# Backend
+Queue management for an office with several counters: customers get a ticket for a service type, officers call the next customer, and the main display board shows the calls and the queue lengths.
 
-## Tech stack
+## Documentation
+
+- [Architecture](docs/architecture.md): components and backend layers
+- [API](docs/api.md): REST endpoints
+- [Database](docs/database.md): schema, rules and SQL scripts
+- [Working agreement](docs/working-agreement.md): branches, commits, pull requests
+
+## Repository layout
+
+```
+backend/    Server: REST API and database
+frontend/   Client: web user interface
+docs/       Project documentation
+```
+
+## Backend
+
+### Tech stack
 
 | Package | Used for |
 |---|---|
@@ -14,11 +31,11 @@
 | `tsx` | Runs TypeScript directly in development, with auto-restart |
 | `oxlint` | Linting |
 | `vitest` | Test runner |
-| `supertest` | For E2E api testing |
+| `supertest` | HTTP API integration tests |
 | `socket.io-client` | Testing socket events |
 | `@types/*` | Type definitions for Node, Express, cors, better-sqlite3 and supertest |
 
-## Getting started
+### Getting started
 
 Requires Node 22 or newer.
 
@@ -30,7 +47,7 @@ npm run dev
 
 The server listens on `http://localhost:3000`.
 
-## Scripts
+### Scripts
 
 | Command | Description |
 |---|---|
@@ -42,68 +59,20 @@ The server listens on `http://localhost:3000`.
 | `npm test` | Run tests once |
 | `npm run test:watch` | Run tests in watch mode |
 
-### Server Architecture
+<!--
+### Demo users
 
-```mermaid
-flowchart TD
-    Client([Client React App])
+Created by `seed-auth.sql`. All demo users have the password `password`.
 
-    subgraph Server [Backend Server]
-        Router[Express Router]
-        Controller[Controller]
-        DAO[DAO]
-        Database[(SQLite)]
+| Username | Role |
+|---|---|
+| `officer1`, `officer2`, `officer3` | Officer |
+| `manager1` | Manager |
+-->
 
-        subgraph Models [Models]
-            DTO[DTO]
-            Entity[Entity]
-        end
-    end
+## Frontend
 
-    Client == "HTTP JSON" ==> Router
-    Router --> Controller
-    Controller --> DAO
-    DAO == "sqlite3" ==> Database
-    Controller -.-> Entity
-    DAO -.-> Entity
-    Controller -.-> DTO
-    Router -.-> DTO
-```
-
-## API
-
-### `GET /services`
-Returns the list of available services.
-
-**200 OK**
-```json
-[
-  { "id": 0, "tag_name": "Shipping" },
-  { "id": 1, "tag_name": "Accounts" }
-]
-```
-
-### `POST /tickets`
-Creates a new ticket for a service.
-
-**Request**
-```json
-{ "service_id": 1 }
-```
-
-**200 OK**
-```json
-{ "id": 1 }
-```
-
-**404 Not Found** – the service does not exist
-```json
-{ "code": 404, "name": "NotFoundError", "message": "Service not found" }
-```
-
-# Frontend
-
-## Tech stack
+### Tech stack
 
 | Package | Used for |
 |---|---|
@@ -112,7 +81,7 @@ Creates a new ticket for a service.
 | `typescript` | Type checking and compilation (pinned to v6) |
 | `oxlint` | Linting |
 
-## Getting started
+### Getting started
 
 ```bash
 cd frontend
@@ -122,7 +91,7 @@ npm run dev
 
 The application runs on `http://localhost:5173`.
 
-## Scripts
+### Scripts
 
 | Command | Description |
 |---|---|
@@ -131,7 +100,7 @@ The application runs on `http://localhost:5173`.
 | `npm run lint` | Lint with oxlint |
 | `npm run preview` | Preview production build locally |
 
-## Base Project Structure
+### Project structure
 
 ```
 src/
