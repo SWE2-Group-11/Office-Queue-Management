@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import ServiceCard from '../queue/ServiceCard';
 import ServiceConfirmationModal from '../queue/ServiceConfirmationModal';
 import TicketSuccessView from '../queue/TicketSuccessView';
-
+import { loginDevice, getServices, createTicket, ApiError } from '../../api/client';
 interface Service {
   id: number | string;
   category: string;
@@ -18,67 +18,78 @@ interface TicketData {
   estimatedWait: string;
 }
 
-export default function ServiceSelectionPage() {
-  const mockServices: Service[] = [
-    { id: 1, category: 'ACCOUNT',  name: 'Account Services', description: 'Deposits, withdrawals and account assistance',  estWait: '~8 min' },
-    { id: 2, category: 'POSTAL', name: 'Send a Package', description: 'Domestic and international shipping',  estWait: '~55 min' },
-    { id: 3, category: 'COLLECTION', name: 'Collect a Package', description: 'Pick up a package or registered item', estWait: '~15 min' },
-    { id: 4, category: 'POSTAL',  name: 'Postal Services', description: 'Stamps, registered mail and other services',  estWait: '~30 min' }
-  ];
 
-  const [services, setServices] = useState<Service[]>(mockServices);
+const SERVICE_INFO: Record<string, Omit<Service, 'id'>> = {
+  deposit: {
+    category: 'POSTAL',
+    name: 'Deposit',
+    description: 'Drop off a package or item',
+    estWait: '~5 min',
+  },
+  shipping: {
+    category: 'POSTAL',
+    name: 'Shipping',
+    description: 'Domestic and international shipping',
+    estWait: '~8 min',
+  },
+  account_management: {
+    category: 'ACCOUNT',
+    name: 'Account Management',
+    description: 'Account assistance',
+    estWait: '~12 min',
+  },
+};
+
+export default function ServiceSelectionPage() {
+  const [services, setServices] = useState<Service[]>([]);
   const [activeModalService, setActiveModalService] = useState<Service | null>(null);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [servicesLoading, setServicesLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const load = async () => {
       try {
-        const response = await fetch('/api/services');
-        if (!response.ok) throw new Error('Failed to fetch services');
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setServices(data);
-        }
+        await loginDevice();
+        const data = await getServices();
+        setServices(
+          data.map((s) => ({
+            id: s.id,
+            ...(SERVICE_INFO[s.tag_name] ?? {
+              category: 'OTHER',
+              name: s.tag_name,
+              description: '',
+              estWait: '-',
+            }),
+          })),
+        );
       } catch (err) {
-        // Fallback to mock services silently
+        setError(err instanceof ApiError ? err.message : 'Cannot reach the server');
+      } finally {
+        setServicesLoading(false);
       }
     };
 
-    fetchServices();
+    load();
   }, []);
 
-const handleGetTicket = async (serviceId: number | string) => {
+  const handleGetTicket = async (serviceId: number | string) => {
     if (!activeModalService) return;
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      
-        body: JSON.stringify({ service_id: serviceId }),
-      });
-      if (!response.ok) throw new Error('Could not generate ticket');
-      const ticket = await response.json();
-      
-   
-      const formattedCode = `A00${ticket.id}`;
+      const ticket = await createTicket(Number(serviceId));
 
       setTicketData({
-        ticketCode: formattedCode,
+        ticketCode: ticket.code,
         serviceName: activeModalService.name,
         estimatedWait: activeModalService.estWait,
       });
       setActiveModalService(null);
     } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not generate ticket');
     
-      setTicketData({
-        ticketCode: 'A003',
-        serviceName: activeModalService.name,
-        estimatedWait: activeModalService.estWait,
-      });
       setActiveModalService(null);
     } finally {
       setLoading(false);
@@ -89,7 +100,7 @@ const handleGetTicket = async (serviceId: number | string) => {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   });
 
   return (
@@ -121,33 +132,39 @@ const handleGetTicket = async (serviceId: number | string) => {
                   <span className="text-2xl font-bold text-slate-900 block">
                     {services.length}
                   </span>
-                  <span className="text-xs text-slate-500">
-                    services available
-                  </span>
+                  <span className="text-xs text-slate-500">services available</span>
                 </div>
               </div>
             </div>
 
-            {error && <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-lg text-sm text-red-700">{error}</div>}
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-lg text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {services.map((service) => (
-                <ServiceCard 
-                  key={service.id} 
-                  service={service} 
-                  onSelect={(s) => setActiveModalService(s)} 
-                />
-              ))}
-            </div>
+            {servicesLoading ? (
+              <p className="text-slate-500 text-sm">Loading services...</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {services.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    onSelect={(s) => setActiveModalService(s)}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </main>
 
-      <ServiceConfirmationModal 
-        service={activeModalService} 
-        onClose={() => setActiveModalService(null)} 
-        onConfirm={handleGetTicket} 
-        loading={loading} 
+      <ServiceConfirmationModal
+        service={activeModalService}
+        onClose={() => setActiveModalService(null)}
+        onConfirm={handleGetTicket}
+        loading={loading}
       />
     </div>
   );
