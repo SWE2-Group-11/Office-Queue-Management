@@ -40,6 +40,6 @@ export const serviceEntityToDTO = (service: Service): ServiceDTO => {
 /**
  * Maps a core Ticket database entity into a client-ready CreateTicketResponseDTO instance.
  */
-export const ticketEntityToCreateResponseDTO = (ticket: Ticket): CreateTicketResponseDTO => {
-    return new CreateTicketResponseDTO(ticket.id);
+export const ticketDataToCreateResponseDTO = (service_id: number, ticket_number: number): CreateTicketResponseDTO => {
+    return new CreateTicketResponseDTO(`S${service_id} - ${ticket_number}`);
 };
