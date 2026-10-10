@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import { db } from "../database/database";
 import { Service } from '../models/entities/service';
 
 type ServiceQueue = {
@@ -7,33 +7,26 @@ type ServiceQueue = {
     queueLength: number;
 };
 
-export class ServiceDAO {
-    private db: Database;
-
-    constructor(db: Database) {
-        this.db = db;
-    }
-
-    /**
-     * Retrieves all available services from the database.
-     * Used for the GET /services endpoint.
-     * @returns An array of Service entities.
-     */
-    listServices(): Service[] {
-        const sql = `SELECT id, tag_name, service_time FROM Service`;
-        return this.db.prepare(sql).all() as Service[];
-    }
+/**
+ * Retrieves all available services from the database.
+ * Used for the GET /services endpoint.
+ * @returns An array of Service entities.
+ */
+export const listServices = (): Service[] => {
+    const sql = "SELECT id, tag_name, service_time FROM service";
+    return db.prepare<[], Service>(sql).all();
+};
 
     /**
      * Retrieves a single service from the database by its unique identifier.
      * @param serviceId The numerical ID of the service type.
      * @returns The Service object if found, or null otherwise.
      */
-    findServiceById(serviceId: number): Service | null {
-        const sql = `SELECT id, tag_name, service_time FROM Service WHERE id = ?`;
-        const row = this.db.prepare(sql).get(serviceId) as Service | undefined;
-        return row ? { id: row.id, tag_name: row.tag_name, service_time: row.service_time } : null;
-    }
+export const findServiceById = (serviceId: number): Service | null => {
+    const sql = `SELECT id, tag_name, service_time FROM Service WHERE id = ?`;
+    const row = db.prepare(sql).get(serviceId) as Service | undefined;
+    return row ? { id: row.id, tag_name: row.tag_name, service_time: row.service_time } : null;
+};
 
     /**
      * Retrieves the waiting queues for a specific counter on a given day.
@@ -41,7 +34,7 @@ export class ServiceDAO {
      * @param day The date in 'YYYY-MM-DD' format.
      * @returns An array of ServiceQueue objects, each containing service details and queue length.
      */
-    getWaitingQueues(counterId: number, day: string): ServiceQueue[] {
+export const getWaitingQueues = (counterId: number, day: string): ServiceQueue[] => {
         const sql = `
             SELECT 
                 s.id AS serviceId, 
@@ -53,6 +46,6 @@ export class ServiceDAO {
             WHERE o.counter_id = ? AND t.day_date = ? AND t.counter_id IS NULL
             GROUP BY s.id, s.service_time
         `;
-        return this.db.prepare(sql).all(counterId, day) as ServiceQueue[];
-    }
+        return db.prepare(sql).all(counterId, day) as ServiceQueue[];
 }
+

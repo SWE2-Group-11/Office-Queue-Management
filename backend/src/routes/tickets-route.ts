@@ -1,16 +1,20 @@
-import {Router} from 'express';
-import { TicketsController } from '../controllers/tickets-controller';
-import { TicketDAO } from '../dao/ticket-dao';
-import { ServiceDAO } from '../dao/service-dao';
-import {AppError} from '../models/errors/app-error';
-import {sendAppError} from '../services/error-service';
-import {db} from '../database/database.js';
+import express, { Request, Response } from "express";
+import { createTicket,  } from "../controllers/tickets-controller";
+import { CreateTicketRequestDTO, CreateTicketRequestSchema, CreateTicketResponseDTO } from "../models/dto/ticket-dto";
+import { validateBody } from "../services/middleware-service";
 
-export const ticketsRouter = Router();
+const router = express.Router();
 
-const controller = new TicketsController(new TicketDAO(db), new ServiceDAO(db));
+router.post(
+    "/",
+    validateBody(CreateTicketRequestSchema),
+    (req: Request<{}, CreateTicketResponseDTO, CreateTicketRequestDTO>, res: Response<CreateTicketResponseDTO>) => {
+        res.json(createTicket(req.body));
+    },
+);
 
-ticketsRouter.post('/counters/:counterId/next-customer', async (req, res) => {
+/** 
+router.post('/counters/:counterId/next-customer', async (req, res) => {
     try {
         const counterId = Number(req.params.counterId);
         const ticket = await controller.getNextCustomer(counterId);
@@ -28,3 +32,4 @@ ticketsRouter.post('/counters/:counterId/next-customer', async (req, res) => {
         return sendAppError(new AppError(500, "InternalServerError", "An unexpected error occurred."), res);
     }
 });
+*/

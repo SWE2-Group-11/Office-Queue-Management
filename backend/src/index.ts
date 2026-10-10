@@ -1,18 +1,13 @@
-import { createServer } from "node:http";
-import { Server } from "socket.io";
 import { app } from "./app";
-import { db } from "./database/database";
+import { APP_PORT, RESET_DB } from "./config/config";
+import { resetDatabase } from "./database/database.js";
 
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: { origin: "http://localhost:5173" },
+if (RESET_DB) {
+    resetDatabase();
+    console.log("Database reset completed.");
+}
+
+// Activate the server
+app.listen(APP_PORT, () => {
+    console.log(`Server listening on http://localhost:${APP_PORT}`);
 });
-
-io.on("connection", (socket) => {
-  socket.on("message", (text: string) => {
-    db.prepare("INSERT INTO messages (text) VALUES (?)").run(text);
-    io.emit("message", text);
-  });
-});
-
-httpServer.listen(3000, () => console.log("Listening on 3000"));
