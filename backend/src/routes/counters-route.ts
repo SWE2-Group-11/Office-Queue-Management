@@ -5,7 +5,7 @@ import {NextCustomerResponseDTO} from "../models/dto/ticket-dto";
 const router = express.Router();
 
 router.post(
-    "/counters/:counterId/next-customer",
+    "/:counterId/next-customer",
     (
         req: Request<{ counterId: string }>,
         res: Response<NextCustomerResponseDTO>
