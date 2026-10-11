@@ -1,11 +1,11 @@
-import { saveTicket, counterExists, inTransaction, findFirstWaitingTicket, assignTicketToCounter } from '../dao/ticket-dao';
+import { saveTicket, counterExists, findFirstWaitingTicket, assignTicketToCounter, getTicketNumber } from '../dao/ticket-dao';
 import { findServiceById, getWaitingQueues } from '../dao/service-dao';
 import { CreateTicketRequestDTO, CreateTicketResponseDTO, NextCustomerResponseDTO } from '../models/dto/ticket-dto';
 import { NotFoundError } from '../models/errors/notfound-error';
-import { BadRequestError } from '../models/errors/badrequest-error';
 import { ticketDataToCreateResponseDTO, ticketEntityToNextCustomerResponseDTO } from '../services/mapper-service';
 import { toLocalDate } from '../services/date-service';
 import { MAX_TICKET_NUMBER_PER_SERVICE } from "../config/config";
+import { inTransaction } from '../database/database';
 
 /**
  * Creates a new ticket for the given service in today's queue.
@@ -32,9 +32,6 @@ export const createTicket = (request: CreateTicketRequestDTO): CreateTicketRespo
  * @returns A Promise resolving to a TicketDTO or null if no customer is found.
 */
 export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | null => {
-    if(!Number.isSafeInteger(counterId) || counterId <= 0) {
-        throw new BadRequestError("Invalid counter ID");
-    }
     return inTransaction(() => {
         // Check if the counter exists
         if (!counterExists(counterId)) {
@@ -54,6 +51,8 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         }
 
         assignTicketToCounter(ticket.id, counterId, today);
-        return ticketEntityToNextCustomerResponseDTO(ticket);
+        const ticketNumber = getTicketNumber(ticket);
+        const displayNumber = ticketNumber % (MAX_TICKET_NUMBER_PER_SERVICE + 1);
+        return ticketEntityToNextCustomerResponseDTO(ticket, displayNumber);
     });  
 }

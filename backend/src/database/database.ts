@@ -44,3 +44,11 @@ export const resetDatabase = (): void => {
         db.exec(seed);
     })();
 };
+
+/**
+ * Funciton to execute a callback within a database transaction.
+ * @param callback The function to execute within the transaction. 
+ */
+export const inTransaction = <T>(callback: () => T): T => {
+    return db.transaction(callback).immediate();
+}

@@ -37,29 +37,21 @@ export const counterExists = (counterId: number): boolean => {
 }
 
 /**
- * Funciton to execute a callback within a database transaction.
- * @param callback The function to execute within the transaction. 
- */
-export const inTransaction = <T>(callback: () => T): T => {
-    return db.transaction(callback).immediate();
-}
-
-/**
  * Finds the first waiting ticket for a given service on a specific day.
  * @param serviceId The numerical ID of the service type.
  * @param day The date in 'YYYY-MM-DD' format.
  * @returns An object containing the ticket ID if found, or null if no waiting ticket exists.
  */
-export const findFirstWaitingTicket = (serviceId: number, day: string): {id: number} | null => {
+export const findFirstWaitingTicket = (serviceId: number, day: string): Ticket | null => {
     const sql = `
-        SELECT id 
+        SELECT id, date, service_id, counter_id
         FROM Ticket 
         WHERE service_id = ? AND date = ? AND counter_id IS NULL 
         ORDER BY id ASC 
         LIMIT 1
     `;
-    const ticket = db.prepare(sql).get(serviceId, day) as {id: number} | undefined;
-    return ticket ?? null;
+    return db.prepare<[number, string], Ticket>(sql).get(serviceId, day) ?? null;
+;
 }
 
 /**
