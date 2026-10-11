@@ -24,3 +24,15 @@ export const CreateTicketRequestSchema = z.object({
  * Data Transfer Object for Ticket request payloads, inferred from the schema.
  */
 export type CreateTicketRequestDTO = z.infer<typeof CreateTicketRequestSchema>;
+
+/**
+ * Data Transfer Object for Ticket response payloads when fetching the next customer.
+ * Used in PATCH /counters/:counterId/next-customer
+ */
+export class NextCustomerResponseDTO {
+    public code: string;
+
+    constructor(code: string) {
+        this.code = code;
+    }
+}
