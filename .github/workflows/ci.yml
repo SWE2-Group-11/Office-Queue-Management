@@ -65,3 +65,36 @@ jobs:
       # Uncomment the following lines if you have tests configured in the frontend
       # - name: Run Frontend Tests
       #   run: npx vitest run
+
+  # --- END-TO-END JOB (Playwright) ---
+  e2e-ci:
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'QA')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./e2e
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: ./e2e/package-lock.json
+
+      - name: Install Backend Dependencies
+        run: npm ci --prefix ../backend
+
+      - name: Install Frontend Dependencies
+        run: npm ci --prefix ../frontend
+
+      - name: Install E2E Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install
+
+      - name: Run Playwright E2E Tests
+        run: npm test
