@@ -39,24 +39,20 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         if (!counterExists(counterId)) {
             throw new NotFoundError("Counter not found");
         }
-        const now = new Date();
-        // Format the date as 'YYYY-MM-DD'
-        const day = [now.getFullYear(),
-                        (now.getMonth() + 1).toString().padStart(2, '0'),
-                        now.getDate().toString().padStart(2, '0')].join('-');
+        const today = toLocalDate();
 
-        const queues = getWaitingQueues(counterId, day);
-        queues.sort((a, b) => b.queueLength - a.queueLength || b.serviceTime - a.serviceTime || b.serviceId - a.serviceId);
+        const queues = getWaitingQueues(counterId, today);
+        queues.sort((a, b) => b.queueLength - a.queueLength || a.serviceTime - b.serviceTime || a.serviceId - b.serviceId);
 
         const selectedService = queues.length > 0 ? queues[0].serviceId : null;
         if(!selectedService) return null; 
 
-        const ticket = findFirstWaitingTicket(selectedService, day);
+        const ticket = findFirstWaitingTicket(selectedService, today);
         if(!ticket) {
             throw new NotFoundError("Selected queue has no waiting tickets");
         }
 
-        assignTicketToCounter(ticket.id, counterId, day);
+        assignTicketToCounter(ticket.id, counterId, today);
         return ticketEntityToNextCustomerResponseDTO(ticket);
     });  
 }
