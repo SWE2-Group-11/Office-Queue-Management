@@ -54,3 +54,8 @@ INSERT INTO ticket (date, service_id) VALUES
     (date('now', 'localtime'), 1),
     (date('now', 'localtime'), 2),
     (date('now', 'localtime'), 1);
+
+-- Accounts
+INSERT INTO account (username, hash, salt, role) VALUES
+('manager', '98ab8721188c5666db59fec0c696d47d', 'f0e30d9b260e1389', 'manager'),
+('device',  '1076b4cd12959131b21e683ab74a567a', 'ea32c73ede99afbc', 'device');

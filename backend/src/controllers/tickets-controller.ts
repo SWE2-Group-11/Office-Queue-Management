@@ -4,11 +4,13 @@ import { CreateTicketRequestDTO, CreateTicketResponseDTO, NextCustomerResponseDT
 import { NotFoundError } from '../models/errors/notfound-error';
 import { BadRequestError } from '../models/errors/badrequest-error';
 import { ticketEntityToCreateResponseDTO, ticketEntityToNextCustomerResponseDTO } from '../services/mapper-service';
+import { toLocalDate } from '../services/date-service';
+import { MAX_TICKET_NUMBER_PER_SERVICE } from "../config/config";
 
 /**
  * Creates a new ticket for the given service in today's queue.
  * @param request The request payload containing the service ID.
- * @returns The created ticket's ID.
+ * @returns The created ticket's code.
  * @throws NotFoundError if the service does not exist.
  */
 export const createTicket = (request: CreateTicketRequestDTO): CreateTicketResponseDTO => {
@@ -17,9 +19,12 @@ export const createTicket = (request: CreateTicketRequestDTO): CreateTicketRespo
         throw new NotFoundError("Service not found");
     }
 
-    const today = new Date().toISOString().slice(0, 10);
-    const ticket = saveTicket(today, service.id);
-    return ticketEntityToCreateResponseDTO(ticket);
+   
+    const today = toLocalDate();
+    const { ticket, ticketNumber } = saveTicket(today, service.id);
+    const displayNumber = ticketNumber % (MAX_TICKET_NUMBER_PER_SERVICE + 1);
+    
+    return ticketDataToCreateResponseDTO(ticket, displayNumber);
 };
 /**
  * Retrieves the next customer for the given counter ID.
@@ -35,26 +40,20 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         if (!counterExists(counterId)) {
             throw new NotFoundError("Counter not found");
         }
-        const now = new Date();
-        // Format the date as 'YYYY-MM-DD'
-        const day = [now.getFullYear(),
-                        (now.getMonth() + 1).toString().padStart(2, '0'),
-                        now.getDate().toString().padStart(2, '0')].join('-');
+        const today = toLocalDate();
 
-        const queues = getWaitingQueues(counterId, day);
+        const queues = getWaitingQueues(counterId, today);
         queues.sort((a, b) => b.queueLength - a.queueLength || b.serviceTime - a.serviceTime || b.serviceId - a.serviceId);
 
         const selectedService = queues.length > 0 ? queues[0].serviceId : null;
         if(!selectedService) return null; 
 
-        const ticket = findFirstWaitingTicket(selectedService, day);
+        const ticket = findFirstWaitingTicket(selectedService, today);
         if(!ticket) {
             throw new NotFoundError("Selected queue has no waiting tickets");
         }
 
-        assignTicketToCounter(ticket.id, counterId, day);
+        assignTicketToCounter(ticket.id, counterId, today);
         return ticketEntityToNextCustomerResponseDTO(ticket);
     });  
 }
-
-   
