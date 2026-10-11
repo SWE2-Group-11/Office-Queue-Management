@@ -26,6 +26,7 @@ export const saveTicket = (date: string, service_id: number): { ticket: Ticket; 
         const ticket = new Ticket(Number(result.lastInsertRowid), date, service_id, null);
         return { ticket, ticketNumber: getTicketNumber(ticket) };
     })();
+
 /**
  * Checks if a counter with the specified ID exists in the database.
  * @param counterId The numerical ID of the counter.
@@ -79,4 +80,3 @@ export const assignTicketToCounter = (ticketId: number, counterId: number, day:s
         throw new Error(`Ticket cannot be assigned to counter`);
     }
 }
-

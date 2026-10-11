@@ -46,7 +46,6 @@ export const ticketDataToCreateResponseDTO = (ticket: Ticket, displayNumber: num
     return new CreateTicketResponseDTO(`S${ticket.service_id} - ${displayNumber}`);
 };
 
-
 export const accountEntityToResponseDTO = (account: Account): AccountResponseDTO => {
     return new AccountResponseDTO(account.id, account.username, account.role);
 }

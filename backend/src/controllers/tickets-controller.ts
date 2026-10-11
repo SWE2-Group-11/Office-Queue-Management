@@ -19,6 +19,7 @@ export const createTicket = (request: CreateTicketRequestDTO): CreateTicketRespo
         throw new NotFoundError("Service not found");
     }
 
+   
     const today = toLocalDate();
     const { ticket, ticketNumber } = saveTicket(today, service.id);
     const displayNumber = ticketNumber % (MAX_TICKET_NUMBER_PER_SERVICE + 1);
@@ -56,5 +57,3 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         return ticketEntityToNextCustomerResponseDTO(ticket);
     });  
 }
-
-   
