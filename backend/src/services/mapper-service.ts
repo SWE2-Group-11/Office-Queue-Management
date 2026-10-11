@@ -45,6 +45,11 @@ export const ticketEntityToCreateResponseDTO = (ticket: Ticket): CreateTicketRes
     return new CreateTicketResponseDTO(ticket.id);
 };
 
-export const ticketEntityToNextCustomerResponseDTO = (ticket: Pick<Ticket, 'id'>): NextCustomerResponseDTO => {
-    return new NextCustomerResponseDTO(ticket.id);
+export const accountEntityToResponseDTO = (account: Account): AccountResponseDTO => {
+    return new AccountResponseDTO(account.id, account.username, account.role);
+}
+
+export const ticketEntityToNextCustomerResponseDTO = (ticket: Ticket, displayNumber: number): NextCustomerResponseDTO => {
+    const response = ticketDataToCreateResponseDTO(ticket, displayNumber);
+    return new NextCustomerResponseDTO(response.code);
 };

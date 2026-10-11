@@ -17,19 +17,14 @@ export const getTicketNumber = (ticket: Ticket): number => {
         this.db = db;
     }
 
-    /**
-     * Persists a new ticket record into the database.
-     * @param ticket The ticket entity containing the current date and service reference.
-     * @returns The newly auto-generated database ID of the inserted record.
-     */
-    saveTicket(ticket: Ticket): number {
-        const sql = `
-            INSERT INTO Ticket (day_date, service_id, counter_id)
-            VALUES (?, ?, ?)
-        `;
-        const result = this.db.prepare(sql).run(ticket.day_date, ticket.service_id, ticket.counter_id);
-        return Number(result.lastInsertRowid);
-    }
+/**
+ * Checks if a counter with the specified ID exists in the database.
+ * @param counterId The numerical ID of the counter.
+ * @returns True if the counter exists, false otherwise.
+ */
+export const counterExists = (counterId: number): boolean => {
+    return db.prepare('SELECT id FROM Counter WHERE id = ?').get(counterId) !== undefined;
+}
 
 /**
  * Finds the first waiting ticket for a given service on a specific day.
@@ -37,16 +32,16 @@ export const getTicketNumber = (ticket: Ticket): number => {
  * @param day The date in 'YYYY-MM-DD' format.
  * @returns An object containing the ticket ID if found, or null if no waiting ticket exists.
  */
-export const findFirstWaitingTicket = (serviceId: number, day: string): {id: number} | null => {
+export const findFirstWaitingTicket = (serviceId: number, day: string): Ticket | null => {
     const sql = `
-        SELECT id 
+        SELECT id, date, service_id, counter_id
         FROM Ticket 
         WHERE service_id = ? AND date = ? AND counter_id IS NULL 
         ORDER BY id ASC 
         LIMIT 1
     `;
-    const ticket = db.prepare(sql).get(serviceId, day) as {id: number} | undefined;
-    return ticket ?? null;
+    return db.prepare<[number, string], Ticket>(sql).get(serviceId, day) ?? null;
+;
 }
 
 /**

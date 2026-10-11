@@ -30,9 +30,9 @@ export type CreateTicketRequestDTO = z.infer<typeof CreateTicketRequestSchema>;
  * Used in POST /counters/:counterId/next-customer
  */
 export class NextCustomerResponseDTO {
-    public id: number;
+    public code: string;
 
-    constructor(id: number) {
-        this.id = id;
+    constructor(code: string) {
+        this.code = code;
     }
 }
