@@ -27,7 +27,7 @@ export type CreateTicketRequestDTO = z.infer<typeof CreateTicketRequestSchema>;
 
 /**
  * Data Transfer Object for Ticket response payloads when fetching the next customer.
- * Used in POST /counters/:counterId/next-customer
+ * Used in PATCH /counters/:counterId/next-customer
  */
 export class NextCustomerResponseDTO {
     public code: string;
