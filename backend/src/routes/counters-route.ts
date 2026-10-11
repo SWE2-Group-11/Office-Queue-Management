@@ -5,7 +5,7 @@ import {BadRequestError} from "../models/errors/badrequest-error";
 
 const router = express.Router();
 
-router.post(
+router.patch(
     "/:counterId/next-customer",
     (
         req: Request<{ counterId: string }>,

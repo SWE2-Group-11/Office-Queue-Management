@@ -6,7 +6,7 @@ import { validateBody } from "../services/middleware-service";
 const router = express.Router();
 
 
-router.patch(
+router.post(
     "/",
     validateBody(CreateTicketRequestSchema),
     (req: Request<{}, CreateTicketResponseDTO, CreateTicketRequestDTO>, res: Response<CreateTicketResponseDTO>) => {
