@@ -2,7 +2,7 @@
 import { ErrorDTO } from '../models/dto/error-dto';
 import { ServiceDTO } from '../models/dto/service-dto';
 import { AccountResponseDTO } from '../models/dto/account-dto';
-import { CreateTicketResponseDTO } from "../models/dto/ticket-dto";
+import { CreateTicketResponseDTO, NextCustomerResponseDTO } from "../models/dto/ticket-dto";
 import { Service } from '../models/entities/service';
 import { Account } from '../models/entities/account';
 import { AppError } from '../models/errors/app-error';
@@ -46,7 +46,11 @@ export const ticketDataToCreateResponseDTO = (ticket: Ticket, displayNumber: num
     return new CreateTicketResponseDTO(`S${ticket.service_id} - ${displayNumber}`);
 };
 
-
 export const accountEntityToResponseDTO = (account: Account): AccountResponseDTO => {
     return new AccountResponseDTO(account.id, account.username, account.role);
 }
+
+export const ticketEntityToNextCustomerResponseDTO = (ticket: Ticket, displayNumber: number): NextCustomerResponseDTO => {
+    const response = ticketDataToCreateResponseDTO(ticket, displayNumber);
+    return new NextCustomerResponseDTO(response.code);
+};

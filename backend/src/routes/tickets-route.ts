@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import { createTicket } from "../controllers/tickets-controller";
-import { CreateTicketRequestDTO, CreateTicketRequestSchema, CreateTicketResponseDTO } from "../models/dto/ticket-dto";
+import { createTicket, getNextCustomer } from "../controllers/tickets-controller";
+import { CreateTicketRequestDTO, CreateTicketRequestSchema, CreateTicketResponseDTO, NextCustomerResponseDTO } from "../models/dto/ticket-dto";
 import { validateBody } from "../services/middleware-service";
 
 const router = express.Router();
+
 
 router.post(
     "/",
