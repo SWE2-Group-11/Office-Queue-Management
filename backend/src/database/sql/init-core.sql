@@ -32,3 +32,12 @@ CREATE TABLE ticket (
     FOREIGN KEY (service_id, counter_id)
         REFERENCES offers(service_id, counter_id)
 );
+
+-- Accounts
+CREATE TABLE account (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT    NOT NULL UNIQUE,
+    salt     TEXT    NOT NULL,
+    hash     TEXT    NOT NULL,
+    role     TEXT    NOT NULL CHECK (role IN ('manager', 'device'))
+);

@@ -1,32 +1,16 @@
+// scripts/hash-password.ts
 // Usage:
-//   npx tsx hash-password.ts <password> [salt]
-// If no salt is given, a random 8-byte hex salt is generated.
+//   npx tsx scripts/hash-password.ts <password> [salt]
+// If no salt is given, a random one is generated.
 
-import { randomBytes, scrypt } from "node:crypto";
+import { generatePasswordHash, hashPassword } from "../src/services/password-service";
 
-const KEY_LENGTH = 16; // bytes -> 32 hex characters
+const [password = "password", givenSalt] = process.argv.slice(2);
 
-export function hashPassword(password: string, salt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    scrypt(password, salt, KEY_LENGTH, (err: Error | null, hashedPasswordBuffer: Buffer) => {
-      if (err) return reject(err);
-      resolve(hashedPasswordBuffer.toString("hex"));
-    });
-  });
-}
+const { salt, hash } = givenSalt
+    ? { salt: givenSalt, hash: hashPassword(password, givenSalt) }
+    : generatePasswordHash(password);
 
-async function main(): Promise<void> {
-  const [clearPassword = "password", givenSalt] = process.argv.slice(2);
-  const salt: string = givenSalt ?? randomBytes(8).toString("hex");
-
-  const passwordToSaveInDB: string = await hashPassword(clearPassword, salt);
-
-  console.log("=== DATA TO INSERT INTO THE DB ===");
-  console.log(`Salt:     ${salt}`);
-  console.log(`Password: ${passwordToSaveInDB}`);
-}
-
-main().catch((err: unknown) => {
-  console.error(err);
-  process.exit(1);
-});
+console.log("=== DATA TO INSERT INTO THE DB ===");
+console.log(`Salt: ${salt}`);
+console.log(`Hash: ${hash}`);

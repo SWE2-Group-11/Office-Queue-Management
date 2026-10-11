@@ -5,10 +5,10 @@ import { z } from "zod";
  * Used in POST /tickets
  */
 export class CreateTicketResponseDTO {
-    public id: number;
+    public code: string;
 
-    constructor(id: number) {
-        this.id = id;
+    constructor(code: string) {
+        this.code = code;
     }
 }
 
