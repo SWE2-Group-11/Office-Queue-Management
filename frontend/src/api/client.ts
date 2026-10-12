@@ -66,6 +66,7 @@ export function createTicket(serviceId: number): Promise<Ticket> {
     body: JSON.stringify({ service_id: serviceId }),
   });
 }
+
 export const loginDevice = () =>
   request('/session', {
     method: 'POST',
