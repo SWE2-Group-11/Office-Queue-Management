@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import CounterReadyView from './CounterReadyView';
 import CounterActiveCallView from './CounterActiveCallView';
 import { callNextTicket } from '../../api/officer';
@@ -8,7 +8,7 @@ import Header from '../common/Header';
 
 export default function OfficerWorkstation() {
   const { counterId } = useParams<{ counterId: string }>();
-  const navigate = useNavigate();
+
 
   const currentCounter = Number(counterId);
   const validCounter = Number.isInteger(currentCounter) && currentCounter > 0;
@@ -46,11 +46,7 @@ export default function OfficerWorkstation() {
     }
   };
 
-  const handleSwitchCounter = () => {
-    localStorage.removeItem('isOfficerAuthenticated');
-    navigate('/login');
-  };
-
+  
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 font-sans text-gray-900">
       <Header />

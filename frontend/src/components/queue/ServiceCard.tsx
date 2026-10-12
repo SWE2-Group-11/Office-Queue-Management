@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface Service {
   id: number | string;
   category: string;

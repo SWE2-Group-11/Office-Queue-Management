@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface TicketData {
   ticketCode: string;
   serviceName: string;
