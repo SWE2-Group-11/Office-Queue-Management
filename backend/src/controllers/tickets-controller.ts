@@ -56,5 +56,3 @@ export const getNextCustomer = (counterId: number): NextCustomerResponseDTO | nu
         return ticketEntityToNextCustomerResponseDTO(ticket, displayNumber);
     });  
 }
-
-   

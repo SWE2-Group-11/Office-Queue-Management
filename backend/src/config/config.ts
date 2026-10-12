@@ -18,7 +18,7 @@ export const ROUTES = {
     V1_TICKETS: `${APP_V1_BASE_URL}${URL_TICKETS}`,
     V1_SERVICES: `${APP_V1_BASE_URL}${URL_SERVICES}`,
     V1_COUNTERS: `${APP_V1_BASE_URL}${URL_COUNTERS}`,
-};
+} as const;
 
 // Server configuration
 export const APP_PORT = Number(process.env.PORT) || 3000;

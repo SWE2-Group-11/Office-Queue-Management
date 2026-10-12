@@ -32,9 +32,10 @@ app.use(session({
 app.use(authenticateSession);
 
 // Routes
-app.use(ROUTES.V1_SERVICES, servicesRoute);
-app.use(ROUTES.V1_TICKETS, ticketsRoute);
-app.use(ROUTES.V1_COUNTERS, countersRoute);
+app.use(ROUTES.V1_AUTH, authRouter);
+app.use(ROUTES.V1_SERVICES, requireRole("device", "manager"), servicesRoute);
+app.use(ROUTES.V1_TICKETS, requireRole("device"), ticketsRoute);
+app.use(ROUTES.V1_COUNTERS, requireRole("device"), countersRoute);
 
 // Unknown routes → 404 in ErrorDTO format
 app.use((req: Request, res: Response) => {

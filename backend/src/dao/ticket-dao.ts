@@ -13,9 +13,19 @@ export const getTicketNumber = (ticket: Ticket): number => {
     return row.total;
 };
 
-    constructor(db: Database) {
-        this.db = db;
-    }
+/**
+ * Persists a new ticket record into the database.
+ * @param date The day the ticket belongs to.
+ * @param service_id The service the ticket is queued for.
+ * @returns The newly created ticket and its daily number.
+ */
+export const saveTicket = (date: string, service_id: number): { ticket: Ticket; ticketNumber: number } =>
+    db.transaction(() => {
+        const sql = "INSERT INTO ticket (date, service_id) VALUES (?, ?)";
+        const result = db.prepare(sql).run(date, service_id);
+        const ticket = new Ticket(Number(result.lastInsertRowid), date, service_id, null);
+        return { ticket, ticketNumber: getTicketNumber(ticket) };
+    })();
 
 /**
  * Checks if a counter with the specified ID exists in the database.
