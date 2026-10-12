@@ -67,17 +67,17 @@ export default function OfficerWorkstation() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="mt-3flex justify-between items-center mb-4">
         <span className="text-xs font-extrabold text-gray-500 tracking-wider">
           OFFICER WORKSTATION · COUNTER {validCounter ? currentCounter : '?'}
         </span>
-        {/*   <button
+       {/*  <button
           onClick={handleSwitchCounter}
           className="text-xs font-extrabold text-gray-600 hover:text-gray-900 underline cursor-pointer"
         >
           Sign out / switch counter
-        </button> */}
-      </div>   
+        </button>*/}
+      </div>
 
       <div className="max-w-2xl mx-auto">
         {!activeTicket ? (
